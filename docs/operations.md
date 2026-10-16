@@ -36,7 +36,7 @@ docker run --rm --network pit-ecommerce_default -v "$PWD/build/zap:/zap/wrk:rw" 
 
 Result: no failures, and no warnings outside the Swagger UI pages, whose looser policy is out of scope on purpose. Missing protection headers or a cookie without `SameSite` fail the scan (`.zap/rules.tsv`), and in CI they fail the build; the rules that are switched off are informational or intended, such as the readable `XSRF-TOKEN` cookie. ZAP can't exempt a single cookie from the `HttpOnly` rule, so that rule is off, and `SessionCookieTest` checks on a running server that the session cookie is `Secure`, `HttpOnly` and `SameSite=Lax`.
 
-In CI also CodeQL for Kotlin and TypeScript, Trivy for the image, dependencies, secrets and configuration, and Dependabot.
+In CI also CodeQL for Kotlin and TypeScript, Trivy for the image, dependencies, secrets and configuration, and Dependabot. CodeQL compiles the Kotlin code with its extractor inside the Gradle daemon, so `gradle.properties` gives the daemon 3 GB instead of the default 512 MB, which the extractor runs out of.
 
 ## Supply chain and release
 
