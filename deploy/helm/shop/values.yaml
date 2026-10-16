@@ -1,0 +1,78 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/example/pit-ecommerce
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  name: ""
+
+database:
+  url: jdbc:postgresql://postgres:5432/shop
+  existingSecret: shop-database
+
+admin:
+  existingSecret: shop-admin
+
+sessionCookieSecure: true
+tracingEndpoint: ""
+extraEnv: []
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    memory: 768Mi
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+service:
+  port: 80
+
+proxy:
+  namespace: ""
+  podLabels: {}
+  addresses: ""
+
+httpRoute:
+  enabled: false
+  parentRefs: []
+  hostnames:
+    - shop.example.com
+
+ingress:
+  enabled: false
+  className: ""
+  host: shop.example.com
+  annotations: {}
+  tlsSecretName: shop-tls
+
+networkPolicy:
+  enabled: true
+  metricsNamespace: monitoring
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  minAvailable: 1

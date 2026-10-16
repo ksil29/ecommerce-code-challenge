@@ -1,0 +1,121 @@
+spring:
+  application:
+    name: ecommerce
+  datasource:
+    url: ${DB_URL:}
+    username: ${DB_USER:}
+    password: ${DB_PASSWORD:}
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+  session:
+    timeout: 30m
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  shutdown: graceful
+  forward-headers-strategy: native
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:true}
+  tomcat:
+    max-swallow-size: 10MB
+    remoteip:
+      internal-proxies: ""
+
+management:
+  server:
+    port: ${MANAGEMENT_PORT:8081}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+        add-additional-paths: true
+  observations:
+    enable:
+      "[spring.security]": false
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+        "[shop.payment]": true
+        "[shop.import]": true
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:1.0}
+  otlp:
+    metrics:
+      export:
+        enabled: ${OTLP_METRICS_ENABLED:false}
+        url: ${OTLP_METRICS_URL:http://localhost:4318/v1/metrics}
+
+springdoc:
+  api-docs:
+    enabled: false
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: false
+    path: /swagger-ui.html
+    version: 5.33.2
+    csrf:
+      enabled: true
+  packages-to-scan: dev.korobovskii.ecommerce.web.api
+
+app:
+  admin:
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD:}
+  security:
+    max-failed-logins: 5
+    lock-duration: PT15M
+    max-concurrent-hashes: 4
+    password:
+      min-length: 12
+      max-length: 128
+    argon2:
+      memory-kib: 19456
+      iterations: 2
+      parallelism: 1
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    login:
+      requests: 10
+      per: PT1M
+    register:
+      requests: 5
+      per: PT10M
+    orders:
+      requests: 30
+      per: PT1M
+    imports:
+      requests: 10
+      per: PT1M
+    api:
+      requests: 600
+      per: PT1M
+    max-tracked-addresses: 100000
+    idle-expiry: PT30M
+  csv-import:
+    max-rows: 10000
+  orders:
+    max-quantity: 99
+    payment-timeout: PT15M
+    reconcile-interval: PT1M
+    reconcile-batch-size: 100
+    idempotency-key-ttl: PT24H
+    history-size: 50
+  sample-data:
+    enabled: ${SAMPLE_DATA:false}
+    location: classpath:sample/products.csv

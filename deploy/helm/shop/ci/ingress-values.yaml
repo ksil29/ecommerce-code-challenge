@@ -1,0 +1,7 @@
+proxy:
+  namespace: ingress-system
+  addresses: 10.244.0.0/16
+
+ingress:
+  enabled: true
+  host: shop.example.com

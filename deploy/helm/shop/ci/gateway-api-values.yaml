@@ -1,0 +1,14 @@
+proxy:
+  namespace: gateway-system
+  podLabels:
+    app.kubernetes.io/component: proxy
+  addresses: 10.244.0.0/16
+
+httpRoute:
+  enabled: true
+  parentRefs:
+    - name: public
+      namespace: gateway-system
+      sectionName: https
+  hostnames:
+    - shop.example.com

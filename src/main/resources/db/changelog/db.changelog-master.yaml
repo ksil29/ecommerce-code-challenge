@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-catalog-and-orders
+      author: dmitrii.korobovskii
+      changes:
+        - sqlFile:
+            path: changes/001-catalog-and-orders.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 002-accounts
+      author: dmitrii.korobovskii
+      changes:
+        - sqlFile:
+            path: changes/002-accounts.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 003-spring-session
+      author: dmitrii.korobovskii
+      changes:
+        - sqlFile:
+            path: changes/003-spring-session.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 004-shedlock
+      author: dmitrii.korobovskii
+      changes:
+        - sqlFile:
+            path: changes/004-shedlock.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 005-audit
+      author: dmitrii.korobovskii
+      changes:
+        - sqlFile:
+            path: changes/005-audit.sql
+            relativeToChangelogFile: true

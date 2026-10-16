@@ -1,0 +1,213 @@
+:root {
+  --bs-primary: #4f46e5;
+  --bs-primary-rgb: 79, 70, 229;
+  --bs-link-color: #4338ca;
+  --bs-link-color-rgb: 67, 56, 202;
+  --bs-link-hover-color: #3730a3;
+  --bs-link-hover-color-rgb: 55, 48, 163;
+  --bs-body-bg: #f5f6fa;
+  --bs-form-invalid-color: #b02a37;
+  --bs-form-invalid-border-color: #b02a37;
+  --bs-border-radius: 0.6rem;
+  --bs-border-radius-lg: 0.9rem;
+  --shop-surface: #ffffff;
+  --shop-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1);
+  --shop-shadow-hover: 0 4px 8px rgba(16, 24, 40, 0.08), 0 8px 24px rgba(16, 24, 40, 0.12);
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3,
+.navbar-brand {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.btn-primary {
+  --bs-btn-bg: #4f46e5;
+  --bs-btn-border-color: #4f46e5;
+  --bs-btn-hover-bg: #4338ca;
+  --bs-btn-hover-border-color: #4338ca;
+  --bs-btn-active-bg: #3730a3;
+  --bs-btn-active-border-color: #3730a3;
+  --bs-btn-disabled-bg: #a5b4fc;
+  --bs-btn-disabled-border-color: #a5b4fc;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: #4f46e5;
+  --bs-btn-border-color: #c7d2fe;
+  --bs-btn-hover-bg: #4f46e5;
+  --bs-btn-hover-border-color: #4f46e5;
+  --bs-btn-active-bg: #4338ca;
+  --bs-btn-disabled-color: #94a3b8;
+  --bs-btn-disabled-border-color: #e2e8f0;
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: #475569;
+  --bs-btn-border-color: #94a3b8;
+  --bs-btn-hover-color: #ffffff;
+  --bs-btn-hover-bg: #475569;
+  --bs-btn-hover-border-color: #475569;
+  --bs-btn-active-bg: #334155;
+  --bs-btn-active-border-color: #334155;
+  --bs-btn-disabled-color: #64748b;
+  --bs-btn-disabled-border-color: #cbd5e1;
+}
+
+.shop-navbar {
+  background: linear-gradient(90deg, #1e1b4b, #312e81);
+}
+
+.shop-navbar .navbar-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  margin-right: 0.5rem;
+  border-radius: 0.5rem;
+  background: #818cf8;
+  color: #1e1b4b;
+  font-weight: 800;
+}
+
+.shop-footer {
+  margin-top: auto;
+  padding: 1.5rem 0;
+  color: #64748b;
+  font-size: 0.85rem;
+  border-top: 1px solid #e2e8f0;
+  background: var(--shop-surface);
+}
+
+.surface {
+  background: var(--shop-surface);
+  border: 1px solid #e5e7eb;
+  border-radius: var(--bs-border-radius-lg);
+  box-shadow: var(--shop-shadow);
+}
+
+.search-panel {
+  padding: 1rem 1.25rem;
+}
+
+.product-card {
+  border: 1px solid #e5e7eb;
+  border-radius: var(--bs-border-radius-lg);
+  box-shadow: var(--shop-shadow);
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shop-shadow-hover);
+}
+
+.product-card .card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.product-card .card-title a:hover {
+  text-decoration: underline;
+}
+
+.thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 7rem;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 0.02em;
+}
+
+.thumb-large {
+  height: 14rem;
+  font-size: 4.5rem;
+  border-radius: var(--bs-border-radius-lg);
+}
+
+.thumb-0 { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+.thumb-1 { background: linear-gradient(135deg, #0ea5e9, #6366f1); }
+.thumb-2 { background: linear-gradient(135deg, #10b981, #0ea5e9); }
+.thumb-3 { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+.thumb-4 { background: linear-gradient(135deg, #ec4899, #8b5cf6); }
+.thumb-5 { background: linear-gradient(135deg, #14b8a6, #22c55e); }
+.thumb-6 { background: linear-gradient(135deg, #f97316, #eab308); }
+.thumb-7 { background: linear-gradient(135deg, #64748b, #334155); }
+
+.price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.quantity-input {
+  max-width: 6rem;
+}
+
+.mono {
+  font-family: var(--bs-font-monospace);
+}
+
+.issue-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.stat {
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.stat .value {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.table {
+  --bs-table-bg: transparent;
+}
+
+.text-danger {
+  color: #b02a37 !important;
+}
+
+.table-surface {
+  background: var(--shop-surface);
+}
+
+.auth-card {
+  padding: 2rem;
+}
+
+.details-json {
+  max-width: 28rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.8rem;
+}

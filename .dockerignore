@@ -1,0 +1,13 @@
+.git
+.github
+.gradle
+.kotlin
+.idea
+build
+**/node_modules
+frontend/dist
+frontend/coverage
+frontend/test-results
+frontend/playwright-report
+src/main/resources/static
+*.iml

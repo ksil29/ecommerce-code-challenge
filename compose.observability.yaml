@@ -1,0 +1,21 @@
+services:
+  lgtm:
+    image: grafana/otel-lgtm:0.36.0
+    ports:
+      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:4317:4317"
+      - "127.0.0.1:4318:4318"
+    volumes:
+      - ./deploy/grafana/dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/shop.yaml:ro
+      - ./deploy/grafana/shop-dashboard.json:/otel-lgtm/shop-dashboard.json:ro
+      - ./deploy/grafana/alerts.yaml:/otel-lgtm/grafana/conf/provisioning/alerting/shop.yaml:ro
+
+  app:
+    depends_on:
+      lgtm:
+        condition: service_started
+    environment:
+      MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: http://lgtm:4318/v1/traces
+      OTLP_METRICS_ENABLED: "true"
+      OTLP_METRICS_URL: http://lgtm:4318/v1/metrics
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
