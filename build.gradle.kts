@@ -5,8 +5,8 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version "2.4.21"
-    kotlin("plugin.spring") version "2.4.21"
+    kotlin("jvm") version "2.4.20"
+    kotlin("plugin.spring") version "2.4.20"
     id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
     id("io.gatling.gradle") version "3.16.0"
@@ -29,7 +29,7 @@ repositories {
     mavenCentral()
 }
 
-extra["kotlin.version"] = "2.4.21"
+extra["kotlin.version"] = "2.4.20"
 extra["tomcat.version"] = "11.0.27"
 extra["jackson-bom.version"] = "3.1.7"
 extra["jackson-2-bom.version"] = "2.21.7"
