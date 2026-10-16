@@ -58,6 +58,7 @@ test("a guest searches, buys with an approved card and sees the paid order", asy
   await expect(page.getByText(resultCount)).toBeVisible();
   await page.locator(".product-card", { hasText: "BS-099" }).getByRole("button", { name: "Add to cart" }).click();
   await page.getByRole("link", { name: "View cart" }).click();
+  await expect(page.getByRole("heading", { name: "Your cart" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Bluetooth Speaker" })).toBeVisible();
   await page.getByRole("link", { name: "Checkout" }).click();
 
