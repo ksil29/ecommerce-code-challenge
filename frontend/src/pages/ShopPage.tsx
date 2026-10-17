@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router";
 import { api } from "../api";
 import { useCart } from "../cart";
@@ -6,8 +6,7 @@ import { Pagination } from "../components/Pagination";
 import { StockBadge } from "../components/StockBadge";
 import { Thumb } from "../components/Thumb";
 import { money } from "../format";
-import type { Category } from "../types";
-import { useFocusAfterSearch } from "../useFocusAfterSearch";
+import { useDraft } from "../useDraft";
 import { useLoad } from "../useLoad";
 import { usePageTitle } from "../usePageTitle";
 
@@ -21,18 +20,27 @@ const SORTS = [
 
 const TEXT_FILTERS = ["q", "categoryId", "minPrice", "maxPrice", "sort"] as const;
 
-function CategorySelect({ categories, initial }: { categories: Category[] | undefined; initial: string }) {
-  const [value, setValue] = useState(initial);
-  return (
-    <select id="categoryId" name="categoryId" className="form-select" value={value} onChange={(event) => setValue(event.target.value)}>
-      <option value="">All</option>
-      {categories?.map((category) => (
-        <option key={category.id} value={category.id}>
-          {category.name}
-        </option>
-      ))}
-    </select>
-  );
+type Filters = Record<(typeof TEXT_FILTERS)[number], string> & { inStock: boolean };
+
+function filtersIn(params: URLSearchParams): Filters {
+  return {
+    q: params.get("q") ?? "",
+    categoryId: params.get("categoryId") ?? "",
+    minPrice: params.get("minPrice") ?? "",
+    maxPrice: params.get("maxPrice") ?? "",
+    sort: params.get("sort") ?? "RELEVANCE",
+    inStock: params.get("inStock") === "true",
+  };
+}
+
+function addressOf(filters: Filters) {
+  const next = new URLSearchParams();
+  TEXT_FILTERS.forEach((key) => {
+    const value = filters[key].trim();
+    if (value) next.set(key, value);
+  });
+  if (filters.inStock) next.set("inStock", "true");
+  return next;
 }
 
 export function ShopPage() {
@@ -42,26 +50,30 @@ export function ShopPage() {
   const categories = useLoad("categories", () => api.categories());
   const { add } = useCart();
   const [added, setAdded] = useState<string>();
-  const searchButton = useFocusAfterSearch(query);
+  const applied = new URLSearchParams(params);
+  applied.delete("page");
+  const filterQuery = applied.toString();
+  const [draft, setDraft] = useDraft(filtersIn(params), filterQuery);
   usePageTitle("Products");
+
+  const edit = (change: Partial<Filters>) => setDraft((current) => ({ ...current, ...change }));
+
+  const choose = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>, change: Partial<Filters>) => {
+    const next = { ...draft, ...change };
+    setDraft(next);
+    if (event.currentTarget.form?.reportValidity()) setParams(addressOf(next));
+  };
 
   const search = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const next = new URLSearchParams();
-    TEXT_FILTERS.forEach((key) => {
-      const value = String(form.get(key) ?? "").trim();
-      if (value) next.set(key, value);
-    });
-    if (form.get("inStock")) next.set("inStock", "true");
-    setParams(next);
+    setParams(addressOf(draft));
   };
 
   const goTo = (page: number) => {
     const next = new URLSearchParams(params);
     next.set("page", String(page));
     setParams(next);
-    window.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   return (
@@ -69,36 +81,74 @@ export function ShopPage() {
       <h1 className="h3 mb-3" tabIndex={-1}>
         Products
       </h1>
-      <form key={query} className="row g-2 align-items-end mb-4 mx-0 surface search-panel" onSubmit={search} role="search">
+      <form className="row g-2 align-items-end mb-4 mx-0 surface search-panel" onSubmit={search} role="search">
         <div className="col-12 col-lg-4">
           <label className="form-label small" htmlFor="q">
             Search
           </label>
-          <input id="q" name="q" className="form-control" placeholder="Name, description or SKU" defaultValue={params.get("q") ?? ""} />
+          <input
+            id="q"
+            name="q"
+            className="form-control"
+            placeholder="Name, description or SKU"
+            value={draft.q}
+            onChange={(event) => edit({ q: event.target.value })}
+          />
         </div>
         <div className="col-6 col-lg-2">
           <label className="form-label small" htmlFor="categoryId">
             Category
           </label>
-          <CategorySelect categories={categories.data} initial={params.get("categoryId") ?? ""} />
+          <select
+            id="categoryId"
+            name="categoryId"
+            className="form-select"
+            value={draft.categoryId}
+            onChange={(event) => choose(event, { categoryId: event.target.value })}
+          >
+            <option value="">All</option>
+            {categories.data?.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="col-3 col-lg-1">
           <label className="form-label small" htmlFor="minPrice">
             Min $
           </label>
-          <input id="minPrice" name="minPrice" type="number" min="0" step="0.01" className="form-control" defaultValue={params.get("minPrice") ?? ""} />
+          <input
+            id="minPrice"
+            name="minPrice"
+            type="number"
+            min="0"
+            step="0.01"
+            className="form-control"
+            value={draft.minPrice}
+            onChange={(event) => edit({ minPrice: event.target.value })}
+          />
         </div>
         <div className="col-3 col-lg-1">
           <label className="form-label small" htmlFor="maxPrice">
             Max $
           </label>
-          <input id="maxPrice" name="maxPrice" type="number" min="0" step="0.01" className="form-control" defaultValue={params.get("maxPrice") ?? ""} />
+          <input
+            id="maxPrice"
+            name="maxPrice"
+            type="number"
+            min="0"
+            step="0.01"
+            className="form-control"
+            value={draft.maxPrice}
+            onChange={(event) => edit({ maxPrice: event.target.value })}
+          />
         </div>
         <div className="col-6 col-lg-2">
           <label className="form-label small" htmlFor="sort">
             Sort
           </label>
-          <select id="sort" name="sort" className="form-select" defaultValue={params.get("sort") ?? "RELEVANCE"}>
+          <select id="sort" name="sort" className="form-select" value={draft.sort} onChange={(event) => choose(event, { sort: event.target.value })}>
             {SORTS.map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
@@ -108,12 +158,19 @@ export function ShopPage() {
         </div>
         <div className="col-6 col-lg-2 d-flex gap-2 align-items-center">
           <div className="form-check mb-0">
-            <input id="inStock" name="inStock" type="checkbox" className="form-check-input" defaultChecked={params.get("inStock") === "true"} />
+            <input
+              id="inStock"
+              name="inStock"
+              type="checkbox"
+              className="form-check-input"
+              checked={draft.inStock}
+              onChange={(event) => choose(event, { inStock: event.target.checked })}
+            />
             <label className="form-check-label small" htmlFor="inStock">
               In stock
             </label>
           </div>
-          <button ref={searchButton} type="submit" className="btn btn-primary ms-auto">
+          <button type="submit" className="btn btn-primary ms-auto">
             Search
           </button>
         </div>
@@ -136,8 +193,9 @@ export function ShopPage() {
           <p className="text-body-secondary small">
             <span role="status">
               {products.data.total} {products.data.total === 1 ? "product" : "products"}
+              {products.data.totalPages > 1 && ` · page ${products.data.page + 1} of ${products.data.totalPages}`}
             </span>
-            {query && (
+            {filterQuery && (
               <>
                 {" · "}
                 <Link to="/">Clear filters</Link>

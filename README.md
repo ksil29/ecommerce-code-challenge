@@ -95,8 +95,8 @@ The frontend runs on <http://localhost:5173> and proxies `/api` to port 8080.
 | Command | What it runs |
 |---|---|
 | `./gradlew check` | detekt, 189 backend tests (needs Docker for PostgreSQL) and the 85% line-coverage gate |
-| `cd frontend && npm ci && npm run lint && npm test && npm run build` | ESLint, 147 frontend tests with the coverage gate, and the strict TypeScript build of the app and the browser tests |
-| `cd frontend && npm ci && npx playwright install chromium && npm run e2e` | 20 browser tests, including accessibility checks, against a running stack (`docker compose up`) |
+| `cd frontend && npm ci && npm run lint && npm test && npm run build` | ESLint, 151 frontend tests with the coverage gate, and the strict TypeScript build of the app and the browser tests |
+| `cd frontend && npm ci && npx playwright install chromium && npm run e2e` | 21 browser tests, including accessibility checks, against a running stack (`docker compose up`) |
 
 The commands for the load test, the security scan and the SBOM are in [`docs/operations.md`](docs/operations.md).
 
@@ -162,7 +162,7 @@ One set of rules (`ProductRules`) checks both CSV rows and the admin form, so a 
 
 - PostgreSQL full-text search on a generated, weighted column (name and SKU above description) with a GIN index, ranked by relevance.
 - Partial words and SKU fragments ("blue" finds "Bluetooth") also match through `ILIKE` on name and SKU, backed by a trigram index. LIKE wildcards in the search text are escaped.
-- Filters by category, price range and stock; sorting by relevance, name, price or newest; pages of up to 100.
+- Filters by category, price range and stock; sorting by relevance, name, price or newest; pages of up to 100. In the shop, a category, sort or stock choice applies at once; typed text and prices apply on Search.
 
 ### Cart, checkout and payment
 
@@ -197,8 +197,8 @@ The application keeps no state that the instances need to share: sessions are in
 ## Quality and testing
 
 - **189 backend tests**, on a real PostgreSQL through Testcontainers where the database matters: every checkout branch, the example file end to end, accounts and lockout, a role matrix of every endpoint for a guest, a customer and an admin, and **concurrency**: 200 buyers for 50 units sell exactly 50, one idempotency key sent from two threads creates one order even for the last item in stock, and neither two overlapping imports nor an import and a checkout deadlock.
-- **147 frontend tests** (Vitest and Testing Library, with the API stubbed): the API client, every checkout branch including a retry after a lost answer that reuses the idempotency key, an expired session, the return address after sign-in, the cart, the shop settings, the admin forms, the route guards, and focus, labels and announcements for screen readers.
-- **20 browser tests** (Playwright) against the running stack: purchases by a guest and a customer, a declined card, a `<script>` product name shown as text, the admin import and the audit log, and axe accessibility checks (WCAG 2.1 AA), also on error states and at phone width.
+- **151 frontend tests** (Vitest and Testing Library, with the API stubbed): the API client, every checkout branch including a retry after a lost answer that reuses the idempotency key, an expired session, the return address after sign-in, the cart, the shop settings, the admin forms, the route guards, and focus, labels and announcements for screen readers.
+- **21 browser tests** (Playwright) against the running stack: purchases by a guest and a customer, a declined card, a sort that stays while paging, a `<script>` product name shown as text, the admin import and the audit log, and axe accessibility checks (WCAG 2.1 AA), also on error states and at phone width.
 - **Coverage:** backend 96% of lines (Kover, without the load-test code), frontend 99% (V8); both runs fail below 85%.
 - **Static analysis:** detekt and Kotlin warnings as errors; ESLint with the React hooks rules and strict TypeScript on the frontend.
 

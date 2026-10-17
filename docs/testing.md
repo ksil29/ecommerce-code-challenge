@@ -12,18 +12,19 @@ The full list behind the summary in the [README](../README.md#quality-and-testin
   - the configuration: no credentials, API docs or trusted proxies in the base settings, the demo ones only in the `local` profile; on a running server, `X-Forwarded-For` is ignored from a peer that is not a trusted proxy and counted per client behind one;
   - the HTTP API, including a **role matrix** of every endpoint for a guest, a customer and an admin (60 checks), quantities outside 1 to the configured maximum (also summed over the lines of one product), the public settings, order lists without lines, bad search parameters, rate limiting (a percent-encoded path counts too), and on a running server the session cookie flags (`Secure`, `HttpOnly`, `SameSite=Lax`) and no session for a refused request;
   - the audit trail.
-- **147 frontend tests** (Vitest and Testing Library; the API is stubbed, and each test drives a page the way a user does):
+- **151 frontend tests** (Vitest and Testing Library; the API is stubbed, and each test drives a page the way a user does):
   - the API client: the CSRF header, the idempotency key, error mapping, every endpoint;
   - checkout: approval, decline, a changed price, missing stock, field errors, a `422` for a reused key, and a retry after a lost answer that reuses the idempotency key, also after a reload;
   - an expired session: the shopper is signed out and sent to sign in, then back to the same page;
   - the shop settings from the server: the quantity limit in the cart, the polling time of a pending payment, the password length on registration, the link to the API documentation only when the server publishes it;
   - the return address after sign-in, which must stay on the shop's own origin;
+  - the shop filters: a category, a sort or the stock filter applies as soon as it is chosen, typed text and prices on Search; paging keeps text typed but not searched and says which page is shown, and Clear filters empties the form;
   - the cart: kept between visits, shared between tabs, products that left the catalog, a quantity typed while the cart is priced again; a category filter that survives Back; polling of a pending payment until the payment timeout has passed;
   - the admin forms (a stale version offers the current values, the reserved units shown next to the on-hand count) and the route guards;
   - accessibility: errors announced and tied to their fields, focus on the first invalid field and on each page's heading, page titles, and the menu at phone width.
 - **Coverage:** backend 96% of lines (Kover, without the load-test code), frontend 99% (V8); both runs fail below 85%.
-- **End to end (Playwright, 20 tests):**
-  - a guest buys; a declined card keeps the cart; a product named `<script>…` renders as text and opens no dialog;
+- **End to end (Playwright, 21 tests):**
+  - a guest buys; a declined card keeps the cart; a price sort applies at once and stays on the next page; a product named `<script>…` renders as text and opens no dialog;
   - a customer registers, buys, sees the order history and is kept out of the admin area; a sign-in link that points to another site lands in the shop instead;
   - the admin imports the example file and finds it in the audit log; an archived product leaves the shop until it is restored;
   - the API documentation loads under the security headers;

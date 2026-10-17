@@ -7,7 +7,7 @@ import { currentLocation, renderPage, storedCart } from "../test/render";
 import { ShopPage } from "./ShopPage";
 
 describe("ShopPage", () => {
-  it("puts the filters into the address and leaves out the empty ones", async () => {
+  it("applies a category, a sort or the stock filter as soon as it is chosen, with the text typed so far", async () => {
     const user = userEvent.setup();
     vi.spyOn(api, "categories").mockResolvedValue([{ id: 1, name: "Audio" }]);
     const products = vi.spyOn(api, "products").mockResolvedValue(pageOf([product()]));
@@ -16,15 +16,37 @@ describe("ShopPage", () => {
     await user.type(screen.getByLabelText("Search"), "  speaker ");
     await screen.findByRole("option", { name: "Audio" });
     await user.selectOptions(screen.getByLabelText("Category"), "Audio");
+
+    await waitFor(() => expect(currentLocation()).toBe("/?q=speaker&categoryId=1&sort=RELEVANCE"));
+    expect(screen.getByLabelText("Category")).toHaveFocus();
+
     await user.selectOptions(screen.getByLabelText("Sort"), "Price: low to high");
     await user.click(screen.getByLabelText("In stock"));
-    await user.click(screen.getByRole("button", { name: "Search" }));
 
     await waitFor(() => expect(currentLocation()).toBe("/?q=speaker&categoryId=1&sort=PRICE_ASC&inStock=true"));
     await waitFor(() => expect(String(products.mock.lastCall?.[0])).toBe("q=speaker&categoryId=1&sort=PRICE_ASC&inStock=true"));
+    expect(screen.getByLabelText("In stock")).toHaveFocus();
   });
 
-  it("keeps focus on the search button when the search form is drawn again", async () => {
+  it("applies typed text and prices on Search and leaves out the empty filters", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(api, "categories").mockResolvedValue([]);
+    const products = vi.spyOn(api, "products").mockResolvedValue(pageOf([product()]));
+    renderPage("/", <ShopPage />);
+
+    await user.type(screen.getByLabelText("Search"), "speaker");
+    await user.type(screen.getByLabelText("Min $"), "10");
+    await user.type(screen.getByLabelText("Max $"), "50");
+    expect(currentLocation()).toBe("/");
+    expect(products).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole("button", { name: "Search" }));
+
+    await waitFor(() => expect(currentLocation()).toBe("/?q=speaker&minPrice=10&maxPrice=50&sort=RELEVANCE"));
+    expect(screen.getByRole("button", { name: "Search" })).toHaveFocus();
+  });
+
+  it("searches on Enter and leaves the focus in the search box", async () => {
     const user = userEvent.setup();
     vi.spyOn(api, "categories").mockResolvedValue([]);
     vi.spyOn(api, "products").mockResolvedValue(pageOf([product()]));
@@ -33,8 +55,21 @@ describe("ShopPage", () => {
     await user.type(screen.getByLabelText("Search"), "speaker{Enter}");
 
     await waitFor(() => expect(currentLocation()).toBe("/?q=speaker&sort=RELEVANCE"));
-    expect(screen.getByRole("button", { name: "Search" })).toHaveFocus();
+    expect(screen.getByLabelText("Search")).toHaveFocus();
     expect(screen.getByLabelText("Search")).toHaveValue("speaker");
+  });
+
+  it("does not apply a choice while a price is invalid", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(api, "categories").mockResolvedValue([]);
+    vi.spyOn(api, "products").mockResolvedValue(pageOf([product()]));
+    renderPage("/", <ShopPage />);
+
+    await user.type(screen.getByLabelText("Min $"), "-5");
+    await user.selectOptions(screen.getByLabelText("Sort"), "Newest");
+
+    expect(screen.getByLabelText("Min $")).toBeInvalid();
+    expect(currentLocation()).toBe("/");
   });
 
   it("names the page and announces how many products match", async () => {
@@ -60,18 +95,53 @@ describe("ShopPage", () => {
     expect(screen.getByLabelText("Category")).toHaveValue("2");
   });
 
-  it("pages through the results and keeps the filters", async () => {
+  it("pages through the results with the filters applied and says which page is shown", async () => {
     const user = userEvent.setup();
     const scrollTo = vi.spyOn(window, "scrollTo");
     vi.spyOn(api, "categories").mockResolvedValue([]);
-    vi.spyOn(api, "products").mockResolvedValue(pageOf([product()], { total: 30, totalPages: 3 }));
+    vi.spyOn(api, "products").mockImplementation(async (params) =>
+      pageOf([product()], { page: Number(params.get("page") ?? 0), total: 30, totalPages: 3 }),
+    );
     renderPage("/", <ShopPage />, { url: "/?q=speaker" });
+    expect(await screen.findByText("30 products · page 1 of 3")).toHaveAttribute("role", "status");
 
-    await user.click(await screen.findByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Next" }));
 
     await waitFor(() => expect(currentLocation()).toBe("/?q=speaker&page=1"));
-    expect(scrollTo).toHaveBeenCalledWith({ top: 0 });
+    expect(await screen.findByText("30 products · page 2 of 3")).toBeInTheDocument();
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "instant" });
     expect(screen.getByRole("button", { name: "Next" })).toHaveFocus();
+  });
+
+  it("keeps text typed but not searched when paging, and offers to clear only real filters", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(api, "categories").mockResolvedValue([]);
+    vi.spyOn(api, "products").mockResolvedValue(pageOf([product()], { total: 30, totalPages: 3 }));
+    renderPage("/", <ShopPage />);
+
+    await user.type(screen.getByLabelText("Search"), "lamp");
+    await user.click(await screen.findByRole("button", { name: "Next" }));
+
+    await waitFor(() => expect(currentLocation()).toBe("/?page=1"));
+    expect(screen.getByLabelText("Search")).toHaveValue("lamp");
+    expect(screen.queryByRole("link", { name: "Clear filters" })).not.toBeInTheDocument();
+  });
+
+  it("empties the form when the filters are cleared", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(api, "categories").mockResolvedValue([{ id: 1, name: "Audio" }]);
+    vi.spyOn(api, "products").mockResolvedValue(pageOf([product()]));
+    renderPage("/", <ShopPage />, { url: "/?q=speaker&categoryId=1&minPrice=10&sort=PRICE_ASC&inStock=true" });
+    await screen.findByRole("option", { name: "Audio" });
+
+    await user.click(await screen.findByRole("link", { name: "Clear filters" }));
+
+    await waitFor(() => expect(currentLocation()).toBe("/"));
+    expect(screen.getByLabelText("Search")).toHaveValue("");
+    expect(screen.getByLabelText("Category")).toHaveValue("");
+    expect(screen.getByLabelText("Min $")).toHaveValue(null);
+    expect(screen.getByLabelText("Sort")).toHaveValue("RELEVANCE");
+    expect(screen.getByLabelText("In stock")).not.toBeChecked();
   });
 
   it("announces a product added to the cart and disables the ones held for other orders", async () => {

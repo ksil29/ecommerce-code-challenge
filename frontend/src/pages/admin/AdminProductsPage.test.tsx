@@ -40,14 +40,16 @@ describe("AdminProductsPage", () => {
     expect(screen.getByRole("columnheader", { name: "Actions" })).toBeInTheDocument();
   });
 
-  it("pages through the list", async () => {
+  it("pages through the list and keeps text typed but not searched", async () => {
     const user = userEvent.setup();
     vi.spyOn(api, "products").mockResolvedValue(pageOf([product()], { total: 120, totalPages: 3 }));
     renderPage("/admin/products", <AdminProductsPage />, { me: ADMIN });
 
+    await user.type(screen.getByLabelText("Search products"), "chess");
     await user.click(await screen.findByRole("button", { name: "Next" }));
 
     await waitFor(() => expect(currentLocation()).toBe("/admin/products?page=1"));
+    expect(screen.getByLabelText("Search products")).toHaveValue("chess");
   });
 
   it("explains why a change was refused", async () => {

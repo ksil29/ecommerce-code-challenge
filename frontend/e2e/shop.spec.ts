@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 
 const sampleCsv = fileURLToPath(new URL("../../src/main/resources/sample/products.csv", import.meta.url));
 
-const resultCount = /^\d+ products?$/;
+const resultCount = /^\d+ products?( · page \d+ of \d+)?$/;
 
 const freshClientAddress = `198.18.${Math.floor(Math.random() * 256)}.${1 + Math.floor(Math.random() * 254)}`;
 
@@ -66,6 +66,20 @@ test("a guest searches, buys with an approved card and sees the paid order", asy
 
   await expect(page.getByText("Paid", { exact: true })).toBeVisible();
   await expect(page.getByText(/Thank you, Guest Buyer/)).toBeVisible();
+});
+
+test("a sort applies as soon as it is chosen and stays while paging", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("Sort").selectOption("PRICE_ASC");
+  await expect(page).toHaveURL(/sort=PRICE_ASC/);
+
+  await page.getByRole("button", { name: "Next" }).click();
+
+  await expect(page.getByText(/^\d+ products · page 2 of \d+$/)).toBeVisible();
+  await expect(page).toHaveURL(/sort=PRICE_ASC/);
+  await expect(page.getByLabel("Sort")).toHaveValue("PRICE_ASC");
+  const prices = (await page.locator(".product-card .price").allTextContents()).map((price) => Number(price.replace(/[^\d.]/g, "")));
+  expect(prices).toEqual([...prices].sort((a, b) => a - b));
 });
 
 test("a declined card keeps the cart for another try", async ({ page }) => {

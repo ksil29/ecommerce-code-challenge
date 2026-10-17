@@ -26,7 +26,7 @@ for (const path of ["/", "/?q=speaker", "/products/BS-021", "/cart", "/login", "
 test("the shop fits a phone screen and opens its menu from a button", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
   await page.goto("/");
-  await expect(page.getByText(/^\d+ products?$/)).toBeVisible();
+  await expect(page.getByText(/^\d+ products?( · page \d+ of \d+)?$/)).toBeVisible();
   const signIn = page.getByRole("link", { name: "Sign in" });
   await expect(signIn).toBeHidden();
 

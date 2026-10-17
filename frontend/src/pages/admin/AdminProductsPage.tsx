@@ -4,7 +4,7 @@ import { api, errorMessage } from "../../api";
 import { Pagination } from "../../components/Pagination";
 import { money } from "../../format";
 import type { Product } from "../../types";
-import { useFocusAfterSearch } from "../../useFocusAfterSearch";
+import { useDraft } from "../../useDraft";
 import { useLoad } from "../../useLoad";
 import { usePageTitle } from "../../usePageTitle";
 
@@ -22,13 +22,14 @@ export function AdminProductsPage() {
   });
   const [message, setMessage] = useState<string>();
   const [busy, setBusy] = useState(false);
-  const searchButton = useFocusAfterSearch(query);
+  const appliedText = params.get("q") ?? "";
+  const [text, setText] = useDraft(appliedText, appliedText);
   usePageTitle("Products · Admin");
 
   const search = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const text = String(new FormData(event.currentTarget).get("q") ?? "").trim();
-    setParams(text ? { q: text } : {});
+    const q = text.trim();
+    setParams(q ? { q } : {});
   };
 
   const toggleArchived = async (product: Product) => {
@@ -60,12 +61,19 @@ export function AdminProductsPage() {
         <h1 className="h4 mb-0 me-2" tabIndex={-1}>
           Products
         </h1>
-        <form key={query} className="d-flex gap-2 me-auto" onSubmit={search} role="search">
+        <form className="d-flex gap-2 me-auto" onSubmit={search} role="search">
           <label className="visually-hidden" htmlFor="admin-search">
             Search products
           </label>
-          <input id="admin-search" name="q" className="form-control" placeholder="Search products" defaultValue={params.get("q") ?? ""} />
-          <button ref={searchButton} type="submit" className="btn btn-outline-secondary">
+          <input
+            id="admin-search"
+            name="q"
+            className="form-control"
+            placeholder="Search products"
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+          />
+          <button type="submit" className="btn btn-outline-secondary">
             Search
           </button>
         </form>
