@@ -129,7 +129,7 @@ Everything else is on the latest stable release; the table explains the versions
 | Tomcat, Jackson | 11.0.27; 2.21.7 and 3.1.7 | 11.0.27; 2.22 and 3.2 | Newer patches than Spring Boot 4.1.1 manages, because the managed ones have known high and critical vulnerabilities (found by Trivy); kept on the minor lines Spring Boot is tested with. The overrides go once Spring Boot 4.1.2 ships |
 | Swagger UI | 5.33.2 | 5.33.2 | springdoc 3.1.1 brings 5.32.14, whose bundled DOMPurify 3.4.13 has two known vulnerabilities (found by ZAP); 5.33.2 bundles 3.4.16. The dependency and `springdoc.swagger-ui.version` go once springdoc ships a newer Swagger UI. Production does not serve Swagger UI anyway |
 | JRE base image | `eclipse-temurin:25-jre` (Ubuntu 26.04) | the same | The Ubuntu 26.04 image ships Pebble, Canonical's service manager, built with a Go release that has three high-severity vulnerabilities (found by Trivy). The container never runs it, since the entrypoint is Java, so the Dockerfile deletes it. That line goes once the base image ships a patched Pebble |
-| Node (in the image) | 24 | 26 | 24 is the current LTS |
+| Node (in the image) | 24 | 26 | 24 is the current LTS; `@types/node` stays on 24 with it |
 | TypeScript | 5.9 | 7.0 | 7.0 is the new native compiler, and `typescript-eslint` supports TypeScript below 6.1 |
 | React Router | 7.18 | 8.4 | 8 is a fresh major release; 7 is maintained |
 | detekt | 2.0.0-alpha.6 | 1.23.8 stable | The stable line does not support Kotlin 2.4 |
