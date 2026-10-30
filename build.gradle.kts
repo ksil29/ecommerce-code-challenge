@@ -46,7 +46,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
-    implementation("org.webjars:swagger-ui:5.33.2")
+    implementation("org.webjars:swagger-ui:5.34.0")
     implementation("org.apache.commons:commons-csv:1.14.1")
     implementation("org.bouncycastle:bcprov-jdk18on:1.86")
     implementation("net.javacrumbs.shedlock:shedlock-spring:7.10.1")
