@@ -49,7 +49,7 @@ dependencies {
     implementation("org.webjars:swagger-ui:5.33.2")
     implementation("org.apache.commons:commons-csv:1.14.1")
     implementation("org.bouncycastle:bcprov-jdk18on:1.86")
-    implementation("net.javacrumbs.shedlock:shedlock-spring:7.10.1")
+    implementation("net.javacrumbs.shedlock:shedlock-spring:7.11.0")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:7.10.1")
     implementation("com.bucket4j:bucket4j_jdk17-core:8.21.0")
     implementation("com.github.ben-manes.caffeine:caffeine")
